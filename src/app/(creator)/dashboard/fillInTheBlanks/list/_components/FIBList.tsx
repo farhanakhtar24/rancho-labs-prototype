@@ -50,29 +50,24 @@ const FIBList = (props: Props) => {
 									<td className="px-6 py-4">
 										<Link
 											className="w-full h-full"
-											href={`/dashboard/fillInTheBlanks/edit/${data._id}`}>
+											href={`/dashboard/fillInTheBlanks/edit/${data.id}`}>
 											Edit
 										</Link>
 									</td>
 									<td className="px-6 py-4">
 										<div
 											className="w-full h-full cursor-pointer"
-											onClick={
-												async () => {
-													await axios.delete(
-														`/api/deleteFIBActivity`,
-														{
-															data: {
-																id: data.id,
-															},
-														}
-													);
-													getFIBData();
-												}
-												// update the fibData state
-											}
-											// href={`/dashboard/fillInTheBlanks/delete/${data._id}`}
-										>
+											onClick={async () => {
+												await axios.delete(
+													`/api/deleteFIBActivity`,
+													{
+														data: {
+															id: data.id,
+														},
+													}
+												);
+												getFIBData();
+											}}>
 											Delete
 										</div>
 									</td>

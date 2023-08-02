@@ -3,8 +3,8 @@ import EditFIBActivity from "../_component/EditFIBActivity";
 
 type Props = {};
 
-const page = (props: Props) => {
-	return <EditFIBActivity />;
+const page = ({ params }: { params: { activityId: string } }) => {
+	return <EditFIBActivity activityId={params.activityId} />;
 };
 
 export default page;

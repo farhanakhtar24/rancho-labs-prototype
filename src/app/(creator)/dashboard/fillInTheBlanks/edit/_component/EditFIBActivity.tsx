@@ -1,14 +1,16 @@
 "use client";
 import axios from "axios";
-import { useSession } from "next-auth/react";
-import React, { FormEvent, FormEventHandler, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { FormEvent, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
-type Props = {};
+type Props = {
+	activityId: string;
+};
 
-const EditFIBActivity = (props: Props) => {
+const EditFIBActivity = ({ activityId }: Props) => {
 	const [question, setQuestion] = useState("");
-
+	const router = useRouter();
 	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const questionArray: String[] = question.split(" ");
@@ -26,7 +28,7 @@ const EditFIBActivity = (props: Props) => {
 				};
 			});
 		try {
-			await axios.post("/api/addFIBData", {
+			await axios.patch("/api/updateFIBData", {
 				question: questionArray,
 				answers: answersArray,
 				hasSubmitted: false,
@@ -35,12 +37,27 @@ const EditFIBActivity = (props: Props) => {
 					wrong: 0,
 					correct: 0,
 				},
+				activityId: activityId,
 			});
-			toast.success("added data");
+			toast.success("updated data");
+			router.replace("/dashboard/fillInTheBlanks/list");
 		} catch (err: any) {
 			toast.error("Something went wrong");
 		}
 	};
+
+	const getFIBData = async (activityId: any) => {
+		const res = await axios.post("/api/getFIBData", {
+			activityId: activityId,
+		});
+		const data = res.data;
+
+		setQuestion(data.questions.join(" "));
+	};
+
+	useEffect(() => {
+		getFIBData(activityId);
+	}, [activityId]);
 
 	return (
 		<form className="p-10 w-1/2" onSubmit={submitHandler}>

@@ -1,5 +1,4 @@
 import Home from "@/components/Home";
-import LogoutBtn from "@/components/LogoutBtn";
 import User from "@/components/User";
 import React from "react";
 
