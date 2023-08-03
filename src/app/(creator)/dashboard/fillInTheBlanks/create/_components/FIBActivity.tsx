@@ -11,30 +11,10 @@ const FIBActivity = (props: Props) => {
 	const router = useRouter();
 	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		const questionArray: String[] = question.split(" ");
-		const answersArray: { index: number; answer: string }[] = question
-			.split(" ")
-			.filter((word) => {
-				if (word.includes("*")) {
-					return true;
-				}
-			})
-			.map((word, index) => {
-				return {
-					index: index + 1,
-					answer: word.replaceAll("*", "").replaceAll(".", ""),
-				};
-			});
+
 		try {
 			await axios.post("/api/addFIBData", {
-				question: questionArray,
-				answers: answersArray,
-				hasSubmitted: false,
-				validationFIB: {
-					score: 0,
-					wrong: 0,
-					correct: 0,
-				},
+				question: question,
 			});
 			toast.success("added data");
 			router.replace("/dashboard/fillInTheBlanks/list");

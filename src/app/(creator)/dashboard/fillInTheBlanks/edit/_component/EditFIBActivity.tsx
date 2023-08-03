@@ -1,4 +1,6 @@
 "use client";
+import { getFIBActivity, getFIBList } from "@/app/hooks/FIBqueries";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { FormEvent, useEffect, useState } from "react";
@@ -13,30 +15,9 @@ const EditFIBActivity = ({ activityId }: Props) => {
 	const router = useRouter();
 	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		const questionArray: String[] = question.split(" ");
-		const answersArray: { index: number; answer: string }[] = question
-			.split(" ")
-			.filter((word) => {
-				if (word.includes("*")) {
-					return true;
-				}
-			})
-			.map((word, index) => {
-				return {
-					index: index + 1,
-					answer: word.replaceAll("*", "").replaceAll(".", ""),
-				};
-			});
 		try {
 			await axios.patch("/api/updateFIBData", {
-				question: questionArray,
-				answers: answersArray,
-				hasSubmitted: false,
-				validationFIB: {
-					score: 0,
-					wrong: 0,
-					correct: 0,
-				},
+				question: question,
 				activityId: activityId,
 			});
 			toast.success("updated data");
@@ -46,18 +27,24 @@ const EditFIBActivity = ({ activityId }: Props) => {
 		}
 	};
 
-	const getFIBData = async (activityId: any) => {
-		const res = await axios.post("/api/getFIBData", {
-			activityId: activityId,
-		});
-		const data = res.data;
-
-		setQuestion(data.questions.join(" "));
-	};
+	const {
+		data,
+		isFetched,
+		isLoading: isFetchingActivity,
+	} = useQuery({
+		queryKey: ["FIBData", activityId],
+		queryFn: getFIBActivity,
+	});
 
 	useEffect(() => {
-		getFIBData(activityId);
-	}, [activityId]);
+		if (isFetched) {
+			setQuestion(data.questions.join(" "));
+		}
+	}, [isFetched, data]);
+
+	if (isFetchingActivity) {
+		return <div>Loading...</div>;
+	}
 
 	return (
 		<form className="p-10 w-1/2" onSubmit={submitHandler}>
