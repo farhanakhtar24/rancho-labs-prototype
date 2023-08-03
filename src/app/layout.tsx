@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { ToastBar } from "react-hot-toast";
 import ToasterContext from "@/context/ToasterContext";
 import Navbar from "@/components/Navbar";
+import ReactQueryContext from "@/context/ReactQueryContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,9 +22,11 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={inter.className}>
-				<ToasterContext />
-				<Navbar />
-				<AuthContext>{children}</AuthContext>
+				<ReactQueryContext>
+					<ToasterContext />
+					<Navbar />
+					<AuthContext>{children}</AuthContext>
+				</ReactQueryContext>
 			</body>
 		</html>
 	);

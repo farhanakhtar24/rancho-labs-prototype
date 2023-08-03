@@ -1,24 +1,48 @@
 "use client";
+import { deleteFIBActivity, getFIBList } from "@/app/hooks/FIBqueries";
+import { QueryCache, useMutation, useQuery } from "@tanstack/react-query";
+import { data } from "autoprefixer";
 import axios from "axios";
-import { get } from "http";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { toast } from "react-hot-toast";
 
 type Props = {};
 
 const FIBList = (props: Props) => {
-	const [fibData, setfibData] = useState([]);
+	const {
+		isLoading: isListLoading,
+		error,
+		data: fibData,
+		refetch: refetchFIBList,
+	} = useQuery({
+		queryKey: ["FIBActivitiesList"],
+		queryFn: getFIBList,
+	});
 
-	const getFIBData = async () => {
-		const res = await axios.get("/api/getAllFIBData");
-		const data = res.data;
-		console.log("data", data);
-		setfibData(data);
-	};
+	const deleteFIBActivityMutation = useMutation({
+		mutationFn: deleteFIBActivity,
+		onSuccess: () => {
+			refetchFIBList();
+			toast.success("Successfully deleted!");
+		},
+	});
 
-	useEffect(() => {
-		getFIBData();
-	}, []);
+	if (isListLoading) {
+		return (
+			<div className="w-full h-full flex justify-center items-center">
+				Loading ...
+			</div>
+		);
+	}
+
+	if (deleteFIBActivityMutation.isLoading) {
+		return (
+			<div className="w-full h-full flex justify-center items-center">
+				Loading ...
+			</div>
+		);
+	}
 
 	return (
 		<div className="p-5">
@@ -36,7 +60,7 @@ const FIBList = (props: Props) => {
 						</tr>
 					</thead>
 					<tbody>
-						{fibData?.map((data: any, index) => {
+						{fibData?.map((data: any, index: number) => {
 							return (
 								<tr
 									key={index}
@@ -57,16 +81,12 @@ const FIBList = (props: Props) => {
 									<td className="px-6 py-4">
 										<div
 											className="w-full h-full cursor-pointer"
-											onClick={async () => {
-												await axios.delete(
-													`/api/deleteFIBActivity`,
+											onClick={() => {
+												deleteFIBActivityMutation.mutate(
 													{
-														data: {
-															id: data.id,
-														},
+														id: data.id,
 													}
 												);
-												getFIBData();
 											}}>
 											Delete
 										</div>
