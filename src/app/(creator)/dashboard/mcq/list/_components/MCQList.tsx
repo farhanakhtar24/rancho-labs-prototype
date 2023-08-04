@@ -1,27 +1,29 @@
 "use client";
-import { deleteFIBData, getFIBList } from "@/app/hooks/FIBqueries";
+import { deleteMcqActivity, getMcqList } from "@/app/hooks/MCQqueries";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { data } from "autoprefixer";
 import Link from "next/link";
 import React from "react";
 import { toast } from "react-hot-toast";
 
 type Props = {};
 
-const FIBList = (props: Props) => {
+const MCQList = (props: Props) => {
 	const {
 		isLoading: isListLoading,
 		error,
-		data: fibData,
-		refetch: refetchFIBList,
+		data: mcqData,
+		refetch: refetchMcqList,
 	} = useQuery({
-		queryKey: ["FIBActivitiesList"],
-		queryFn: getFIBList,
+		queryKey: ["MCQList"],
+		queryFn: getMcqList,
 	});
+	console.log("data", mcqData);
 
-	const deleteFIBDataMutation = useMutation({
-		mutationFn: deleteFIBData,
+	const deleteMcqActivtyMutation = useMutation({
+		mutationFn: deleteMcqActivity,
 		onSuccess: () => {
-			refetchFIBList();
+			refetchMcqList();
 			toast.success("Successfully deleted!");
 		},
 	});
@@ -34,15 +36,13 @@ const FIBList = (props: Props) => {
 		);
 	}
 
-	if (deleteFIBDataMutation.isLoading) {
+	if (deleteMcqActivtyMutation.isLoading) {
 		return (
 			<div className="w-full h-full flex justify-center items-center">
 				Loading ...
 			</div>
 		);
 	}
-
-	console.log("data", fibData);
 
 	return (
 		<div className="p-5">
@@ -60,7 +60,7 @@ const FIBList = (props: Props) => {
 						</tr>
 					</thead>
 					<tbody>
-						{fibData?.map((data: any, index: number) => {
+						{mcqData?.map((data: any, index: number) => {
 							return (
 								<tr
 									key={index}
@@ -69,21 +69,20 @@ const FIBList = (props: Props) => {
 										scope="row"
 										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap 
 								dark:text-white">
-										{data.questions.join(" ")}
+										{data.question}
 									</th>
 									<td className="px-6 py-4">
 										<Link
 											className="w-full h-full"
-											href={`/dashboard/fillInTheBlanks/edit/${data.id}`}>
+											href={`/dashboard/mcq/edit/${data.id}`}>
 											Edit
 										</Link>
 									</td>
 									<td className="px-6 py-4">
 										<div
 											className="w-full h-full cursor-pointer"
-											onClick={async (e) => {
-												e.preventDefault();
-												await deleteFIBDataMutation.mutateAsync(
+											onClick={() => {
+												deleteMcqActivtyMutation.mutate(
 													{
 														id: data.id,
 													}
@@ -102,4 +101,4 @@ const FIBList = (props: Props) => {
 	);
 };
 
-export default FIBList;
+export default MCQList;

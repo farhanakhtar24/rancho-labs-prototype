@@ -1,7 +1,6 @@
 "use client";
-import { getFIBActivity, getFIBList } from "@/app/hooks/FIBqueries";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { getFIBData, updateFIBData } from "@/app/hooks/FIBqueries";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import React, { FormEvent, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -15,17 +14,21 @@ const EditFIBActivity = ({ activityId }: Props) => {
 	const router = useRouter();
 	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		try {
-			await axios.patch("/api/updateFIBData", {
-				question: question,
-				activityId: activityId,
-			});
+		const updatedFIBActivity = await updateFIBDataMutation.mutateAsync({
+			question: question,
+			activityId: activityId,
+		});
+		console.log("updatedFIBActivity:", updatedFIBActivity);
+	};
+
+	const updateFIBDataMutation = useMutation({
+		mutationKey: ["updateFIBData", question],
+		mutationFn: updateFIBData,
+		onSuccess: () => {
 			toast.success("updated data");
 			router.replace("/dashboard/fillInTheBlanks/list");
-		} catch (err: any) {
-			toast.error("Something went wrong");
-		}
-	};
+		},
+	});
 
 	const {
 		data,
@@ -33,7 +36,7 @@ const EditFIBActivity = ({ activityId }: Props) => {
 		isLoading: isFetchingActivity,
 	} = useQuery({
 		queryKey: ["FIBData", activityId],
-		queryFn: getFIBActivity,
+		queryFn: getFIBData,
 	});
 
 	useEffect(() => {
@@ -45,6 +48,8 @@ const EditFIBActivity = ({ activityId }: Props) => {
 	if (isFetchingActivity) {
 		return <div>Loading...</div>;
 	}
+
+	console.log("data", data);
 
 	return (
 		<form className="p-10 w-1/2" onSubmit={submitHandler}>

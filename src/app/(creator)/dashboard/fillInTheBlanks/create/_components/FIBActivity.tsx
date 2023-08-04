@@ -1,5 +1,6 @@
 "use client";
-import axios from "axios";
+import { addFIBData } from "@/app/hooks/FIBqueries";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import React, { FormEvent, FormEventHandler, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -11,17 +12,20 @@ const FIBActivity = (props: Props) => {
 	const router = useRouter();
 	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		const FIBActivity = await addFIBDataMutation.mutateAsync({
+			question: question,
+		});
+		console.log("FIBActivity:", FIBActivity);
+	};
 
-		try {
-			await axios.post("/api/addFIBData", {
-				question: question,
-			});
+	const addFIBDataMutation = useMutation({
+		mutationKey: ["addFIBData", question],
+		mutationFn: addFIBData,
+		onSuccess: () => {
 			toast.success("added data");
 			router.replace("/dashboard/fillInTheBlanks/list");
-		} catch (err: any) {
-			toast.error("Something went wrong");
-		}
-	};
+		},
+	});
 
 	return (
 		<form className="p-10 w-1/2" onSubmit={submitHandler}>
