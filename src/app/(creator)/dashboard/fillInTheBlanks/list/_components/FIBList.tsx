@@ -2,7 +2,7 @@
 import { deleteFIBData, getFIBList } from "@/app/hooks/FIBqueries";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React from "react";
 import { toast } from "react-hot-toast";
 
 type Props = {};

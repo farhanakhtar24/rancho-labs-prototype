@@ -5,3 +5,11 @@ export const fibRoutes = {
 	updateFIBData: "/api/fib/updateFIBData",
 	getFIBList: "/api/fib/getFIBList",
 };
+
+export const flashCardRoutes = {
+	addFlashCardData: "/api/flashcard/addFlashCardData",
+	deleteFlashCardData: "/api/flashcard/deleteFlashCardData",
+	getFlashCardData: "/api/flashcard/getFlashCardData",
+	updateFlashCardData: "/api/flashcard/updateFlashCardData",
+	getFlashCardList: "/api/flashcard/getFlashCardList",
+};
