@@ -14,3 +14,5 @@ const page = (props: Props) => {
 };
 
 export default page;
+
+// "postinstall": "npx prisma generate --schema=./src/prisma/schema.prisma"
