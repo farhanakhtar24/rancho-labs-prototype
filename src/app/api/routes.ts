@@ -7,9 +7,9 @@ export const fibRoutes = {
 };
 
 export const flashCardRoutes = {
-	addFlashCardData: "/api/flashcard/addFlashCardData",
-	deleteFlashCardData: "/api/flashcard/deleteFlashCardData",
-	getFlashCardData: "/api/flashcard/getFlashCardData",
-	updateFlashCardData: "/api/flashcard/updateFlashCardData",
-	getFlashCardList: "/api/flashcard/getFlashCardList",
+	addFlashCardData: "/api/flashcards/addFlashCardData",
+	deleteFlashCardData: "/api/flashcards/deleteFlashCardData",
+	getFlashCardData: "/api/flashcards/getFlashCardData",
+	updateFlashCardData: "/api/flashcards/updateFlashCardData",
+	getFlashCardList: "/api/flashcards/getFlashCardList",
 };
