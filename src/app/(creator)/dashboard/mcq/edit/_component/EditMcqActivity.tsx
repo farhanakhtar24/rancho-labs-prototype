@@ -40,7 +40,6 @@ const EditMcqActivity = ({ activityId }: Props) => {
 				option4: data.option4,
 				activityId: activityId,
 			});
-			console.log("res.data: ", res.data);
 			toast.success("Activity updated successfully");
 			router.replace(`/dashboard/mcq/list`);
 		} catch (err) {

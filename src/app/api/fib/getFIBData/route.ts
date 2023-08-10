@@ -5,7 +5,6 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: any) {
 	const { activityId } = await request.json();
-	console.log("activityId", activityId);
 	const fibActivity = await prisma.fibActivity.findFirst({
 		where: {
 			id: activityId,
