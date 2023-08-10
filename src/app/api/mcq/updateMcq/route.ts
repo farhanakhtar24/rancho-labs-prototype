@@ -1,5 +1,4 @@
 import prisma from "@/libs/prismaDb";
-import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function PATCH(request: any) {
@@ -37,7 +36,7 @@ export async function PATCH(request: any) {
 		score: 0,
 		wrong: 0,
 		correct: 0,
-	} as Prisma.JsonObject;
+	};
 	const hasSubmittedData = false;
 	const optionsArray = [option1, option2, option3, option4];
 
