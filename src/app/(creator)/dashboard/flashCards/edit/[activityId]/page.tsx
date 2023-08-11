@@ -1,10 +1,10 @@
 import React from "react";
-import EditFIBActivity from "../_component/EditFIBActivity";
+import EditFlashCards from "../_component/EditFlashCardsActivity";
 
 type Props = {};
 
 const page = ({ params }: { params: { activityId: string } }) => {
-	return <EditFIBActivity activityId={params.activityId} />;
+	return <EditFlashCards activityId={params.activityId} />;
 };
 
 export default page;

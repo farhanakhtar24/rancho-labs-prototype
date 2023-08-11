@@ -1,21 +1,39 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { addFlashCardsData } from "@/app/hooks/FlashCardsqueries";
+import {
+	addFlashCardsData,
+	getFlashCardData,
+} from "@/app/hooks/FlashCardsqueries";
 import { storage } from "@/firebase/config";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
 import React, { FormEvent, useState } from "react";
 import { toast } from "react-hot-toast";
 import { v4 } from "uuid";
 
-type Props = {};
+type Props = {
+	activityId: string;
+};
 
-const AddFlashCards = (props: Props) => {
+const EditFlashCards = ({ activityId }: Props) => {
 	const router = useRouter();
 	const [activtityName, setactivtityName] = useState("");
 	const [images, setImages] = useState<FileList | null>(null);
 	let imageUrls: string[] = [];
+
+	const {
+		data,
+		isFetched,
+		isLoading: isFetchingActivity,
+	} = useQuery({
+		queryKey: ["getFlashCardData", activityId],
+		queryFn: getFlashCardData,
+		onSuccess: (data) => {
+			setactivtityName(data.activityName);
+			// setImages(data.imgUrls);
+		},
+	});
 
 	const uploadImage = async (image: File) => {
 		const imageRef = ref(storage, `images/${image.name + v4()}`);
@@ -23,6 +41,15 @@ const AddFlashCards = (props: Props) => {
 		const url = await getDownloadURL(res.ref);
 		return url;
 	};
+
+	const addFlashCardDataMutation = useMutation({
+		mutationKey: ["addFlashCardData"],
+		mutationFn: addFlashCardsData,
+		onSuccess: () => {
+			toast.success("added data");
+			router.replace("/dashboard/flashCards/list");
+		},
+	});
 
 	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -45,14 +72,9 @@ const AddFlashCards = (props: Props) => {
 		console.log("flashCardActivity:", flashCardActivity);
 	};
 
-	const addFlashCardDataMutation = useMutation({
-		mutationKey: ["addFlashCardData"],
-		mutationFn: addFlashCardsData,
-		onSuccess: () => {
-			toast.success("added data");
-			router.replace("/dashboard/flashCards/list");
-		},
-	});
+	if (!isFetched || isFetchingActivity) {
+		return <div>loading...</div>;
+	}
 
 	return (
 		<form className="p-10 w-1/2" onSubmit={submitHandler}>
@@ -153,4 +175,4 @@ const AddFlashCards = (props: Props) => {
 	);
 };
 
-export default AddFlashCards;
+export default EditFlashCards;

@@ -49,6 +49,9 @@ const FlashCardsList = (props: Props) => {
 
 	return (
 		<div className="p-5">
+			<div className="flex justify-center items-center font-bold text-2xl text-gray-600 pb-5">
+				Flashcards List
+			</div>
 			<div className="relative overflow-x-auto">
 				<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
 					<thead
@@ -56,7 +59,10 @@ const FlashCardsList = (props: Props) => {
                         dark:text-gray-400">
 						<tr>
 							<th scope="col" className="px-6 py-3">
-								Question
+								Activity
+							</th>
+							<th scope="col" className="px-6 py-3">
+								Images
 							</th>
 							<th scope="col" className="px-6 py-3"></th>
 							<th scope="col" className="px-6 py-3"></th>
@@ -64,6 +70,8 @@ const FlashCardsList = (props: Props) => {
 					</thead>
 					<tbody>
 						{flashCardsData?.map((data: any, index: number) => {
+							const { activityName } = data;
+							const { imgUrls } = data;
 							return (
 								<tr
 									key={index}
@@ -72,12 +80,35 @@ const FlashCardsList = (props: Props) => {
 										scope="row"
 										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap 
 								dark:text-white">
-										{data.activityName}
+										{activityName}
+									</th>
+									<th
+										scope="row"
+										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap 
+								dark:text-white">
+										{imgUrls && (
+											<div className="flex flex-row gap-2">
+												{imgUrls.map(
+													(
+														imgUrl: string,
+														idx: number
+													) => {
+														return (
+															<img
+																key={idx}
+																src={imgUrl}
+																className="w-20 h-auto"
+															/>
+														);
+													}
+												)}
+											</div>
+										)}
 									</th>
 									<td className="px-6 py-4">
 										<Link
 											className="w-full h-full"
-											href={`/dashboard/fillInTheBlanks/edit/${data.id}`}>
+											href={`/dashboard/flashCards/edit/${data.id}`}>
 											Edit
 										</Link>
 									</td>

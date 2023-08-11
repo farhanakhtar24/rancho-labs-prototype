@@ -24,3 +24,11 @@ export const deleteFlashCardData = async ({ id }: any) => {
 	});
 	return res.data;
 };
+
+export const getFlashCardData = async ({ queryKey }: any) => {
+	const activityId = queryKey[1];
+	const res = await axios.post(`${flashCardRoutes.getFlashCardData}`, {
+		activityId: activityId,
+	});
+	return res.data;
+};

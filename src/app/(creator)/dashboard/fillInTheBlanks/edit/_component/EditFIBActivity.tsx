@@ -37,13 +37,10 @@ const EditFIBActivity = ({ activityId }: Props) => {
 	} = useQuery({
 		queryKey: ["FIBData", activityId],
 		queryFn: getFIBData,
-	});
-
-	useEffect(() => {
-		if (isFetched) {
+		onSuccess: (data) => {
 			setQuestion(data.questions.join(" "));
-		}
-	}, [isFetched, data]);
+		},
+	});
 
 	if (isFetchingActivity) {
 		return <div>Loading...</div>;

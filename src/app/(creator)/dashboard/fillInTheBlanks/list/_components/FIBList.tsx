@@ -46,6 +46,9 @@ const FIBList = (props: Props) => {
 
 	return (
 		<div className="p-5">
+			<div className="flex justify-center items-center font-bold text-2xl text-gray-600 pb-5">
+				Fill In The Blanks List
+			</div>
 			<div className="relative overflow-x-auto">
 				<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
 					<thead
@@ -55,12 +58,21 @@ const FIBList = (props: Props) => {
 							<th scope="col" className="px-6 py-3">
 								Question
 							</th>
+							<th scope="col" className="px-6 py-3">
+								Answer
+							</th>
 							<th scope="col" className="px-6 py-3"></th>
 							<th scope="col" className="px-6 py-3"></th>
 						</tr>
 					</thead>
 					<tbody>
 						{fibData?.map((data: any, index: number) => {
+							const question = data.questions.join(" ");
+							const answer = data.answers
+								.map((answerObject: any) => {
+									return answerObject.answer;
+								})
+								.join(", ");
 							return (
 								<tr
 									key={index}
@@ -69,7 +81,13 @@ const FIBList = (props: Props) => {
 										scope="row"
 										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap 
 								dark:text-white">
-										{data.questions.join(" ")}
+										{question}
+									</th>
+									<th
+										scope="row"
+										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap 
+								dark:text-white">
+										{answer}
 									</th>
 									<td className="px-6 py-4">
 										<Link
