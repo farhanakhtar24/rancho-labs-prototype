@@ -18,7 +18,11 @@ const AddFlashCards = (props: Props) => {
 	let imageUrls: string[] = [];
 
 	const uploadImage = async (image: File) => {
-		const imageRef = ref(storage, `images/${image.name + v4()}`);
+		const imageName = image.name + v4();
+		const imageRef = ref(
+			storage,
+			`flashCards/${activtityName}/${imageName}`
+		);
 		const res = await uploadBytes(imageRef, image);
 		const url = await getDownloadURL(res.ref);
 		return url;
@@ -26,7 +30,13 @@ const AddFlashCards = (props: Props) => {
 
 	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		if (!images) {
+		if (!images && !activtityName) {
+			toast.error("Please add images and activity name");
+			return;
+		} else if (!activtityName) {
+			toast.error("Please add activity name");
+			return;
+		} else if (!images) {
 			toast.error("Please add images");
 			return;
 		}
@@ -123,24 +133,78 @@ const AddFlashCards = (props: Props) => {
 
 			{images && (
 				<div className="grid grid-cols-3 gap-2 mb-3 bg-gray-300 p-2 rounded">
-					{Array.from(images).map((image, idx) => (
-						<div key={idx} className="rounded overflow-hidden">
-							<img src={URL.createObjectURL(image)} alt="image" />
+					{images.map((image, idx) => (
+						// render images along a delete button
+						<div className="relative" key={idx}>
+							<img
+								src={URL.createObjectURL(image)}
+								alt="image"
+								className="w-full h-full rounded-lg"
+							/>
+							<button
+								type="button"
+								className="absolute top-0 right-0 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none 
+								focus:ring-red-300 font-medium rounded-lg text-sm w-8 h-8 text-center 
+								dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+								onClick={() => {
+									setImages((prev) => {
+										if (prev) {
+											const newImages = prev.filter(
+												(_, i) => i !== idx
+											);
+											return newImages.length
+												? newImages
+												: null;
+										}
+										return null;
+									});
+								}}>
+								X
+							</button>
 						</div>
 					))}
 				</div>
 			)}
 
 			<div className="flex gap-2">
+				{images && (
+					<label
+						htmlFor="dropzone-file2"
+						className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none 
+							focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center 
+							dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800 cursor-pointer">
+						<span>Add More Images</span>
+
+						<input
+							id="dropzone-file2"
+							type="file"
+							className="hidden"
+							multiple
+							onChange={(e) => {
+								const files = e.target.files;
+								if (files) {
+									setImages((prev) => {
+										if (prev) {
+											return [
+												...prev,
+												...Array.from(files),
+											];
+										}
+										return Array.from(files);
+									});
+								}
+							}}
+						/>
+					</label>
+				)}
+
 				<button
 					type="submit"
 					className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none 
 				focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center 
 				dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-					Submit
+					Upload & Submit
 				</button>
-				{/* create a reset button to reset the form and images state using ht esame button as above*/}
-
 				<button
 					onClick={() => {
 						setImages(null);
