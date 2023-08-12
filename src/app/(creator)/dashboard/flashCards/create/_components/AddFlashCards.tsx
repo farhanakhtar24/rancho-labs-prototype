@@ -14,7 +14,7 @@ type Props = {};
 const AddFlashCards = (props: Props) => {
 	const router = useRouter();
 	const [activtityName, setactivtityName] = useState("");
-	const [images, setImages] = useState<FileList | null>(null);
+	const [images, setImages] = useState<File[] | null>(null);
 	let imageUrls: string[] = [];
 
 	const uploadImage = async (image: File) => {
@@ -111,7 +111,10 @@ const AddFlashCards = (props: Props) => {
 							className="hidden"
 							multiple
 							onChange={(e) => {
-								setImages(e.target.files);
+								const files = e.target.files;
+								if (files) {
+									setImages(Array.from(files));
+								}
 							}}
 						/>
 					</label>
