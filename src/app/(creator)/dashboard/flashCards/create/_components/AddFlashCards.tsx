@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { addFlashCardsData } from "@/app/hooks/FlashCardsqueries";
+import Spinner from "@/components/Spinner";
 import { storage } from "@/firebase/config";
 import { useMutation } from "@tanstack/react-query";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -15,6 +16,7 @@ const AddFlashCards = (props: Props) => {
 	const router = useRouter();
 	const [activtityName, setactivtityName] = useState("");
 	const [images, setImages] = useState<File[] | null>(null);
+	const [uploadingAndSubmitting, setUploadingAndSubmitting] = useState(false);
 	let imageUrls: string[] = [];
 
 	const uploadImage = async (image: File) => {
@@ -41,17 +43,18 @@ const AddFlashCards = (props: Props) => {
 			return;
 		}
 
+		setUploadingAndSubmitting(true);
 		// upload images to firebase storage and block the code until all images are uploaded
 		for (let i = 0; i < images.length; i++) {
 			const url = await uploadImage(images[i]);
 			imageUrls.push(url);
 		}
-
 		// dont add data to db until all images are uploaded
 		const flashCardActivity = await addFlashCardDataMutation.mutateAsync({
 			activityName: activtityName,
 			imgUrls: imageUrls,
 		});
+		setUploadingAndSubmitting(false);
 		console.log("flashCardActivity:", flashCardActivity);
 	};
 
@@ -202,7 +205,8 @@ const AddFlashCards = (props: Props) => {
 					type="submit"
 					className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none 
 				focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center 
-				dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+				dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex gap-2">
+					{uploadingAndSubmitting && <Spinner size="sm" />}
 					Upload & Submit
 				</button>
 				<button
