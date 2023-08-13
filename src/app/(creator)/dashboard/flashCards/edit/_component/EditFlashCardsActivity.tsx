@@ -4,9 +4,15 @@ import {
 	addFlashCardsData,
 	getFlashCardData,
 } from "@/app/hooks/FlashCardsqueries";
+import Spinner from "@/components/Spinner";
 import { storage } from "@/firebase/config";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import {
+	deleteObject,
+	getDownloadURL,
+	ref,
+	uploadBytes,
+} from "firebase/storage";
 import { useRouter } from "next/navigation";
 import React, { FormEvent, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -19,27 +25,49 @@ type Props = {
 const EditFlashCards = ({ activityId }: Props) => {
 	const router = useRouter();
 	const [activtityName, setactivtityName] = useState("");
-	const [images, setImages] = useState<FileList | null>(null);
-	let imageUrls: string[] = [];
-
-	const {
-		data,
-		isFetched,
-		isLoading: isFetchingActivity,
-	} = useQuery({
-		queryKey: ["getFlashCardData", activityId],
-		queryFn: getFlashCardData,
-		onSuccess: (data) => {
-			setactivtityName(data.activityName);
-			// setImages(data.imgUrls);
-		},
-	});
+	const [newImages, setNewImages] = useState<File[] | null>(null);
+	const [uploadingAndSubmitting, setUploadingAndSubmitting] = useState(false);
+	let imagesData: { imageName: string; imgUrl: string }[] = [];
 
 	const uploadImage = async (image: File) => {
-		const imageRef = ref(storage, `images/${image.name + v4()}`);
+		const imageName = image.name + v4();
+		const imageRef = ref(
+			storage,
+			`flashCards/${activtityName}/${imageName}`
+		);
 		const res = await uploadBytes(imageRef, image);
-		const url = await getDownloadURL(res.ref);
-		return url;
+		const imgUrl = await getDownloadURL(res.ref);
+		return { imageName, imgUrl };
+	};
+
+	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (!newImages && !activtityName) {
+			toast.error("Please add images and activity name");
+			return;
+		} else if (!activtityName) {
+			toast.error("Please add activity name");
+			return;
+		} else if (!newImages) {
+			toast.error("Please add images");
+			return;
+		}
+
+		// set loading
+		setUploadingAndSubmitting(true);
+		// upload images to firebase storage and block the code until all images are uploaded
+		for (let i = 0; i < newImages.length; i++) {
+			const url = await uploadImage(newImages[i]);
+			imagesData.push(url);
+		}
+		// dont add data to db until all images are uploaded
+		const flashCardActivity = await addFlashCardDataMutation.mutateAsync({
+			activityName: activtityName,
+			imagesData: imagesData,
+		});
+		// unset loading
+		setUploadingAndSubmitting(false);
+		console.log("flashCardActivity:", flashCardActivity);
 	};
 
 	const addFlashCardDataMutation = useMutation({
@@ -51,30 +79,26 @@ const EditFlashCards = ({ activityId }: Props) => {
 		},
 	});
 
-	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		if (!images) {
-			toast.error("Please add images");
-			return;
-		}
+	const {
+		data: flashCardData,
+		isLoading: flashCardDataLoading,
+		refetch: refetchFlashCardData,
+	} = useQuery({
+		queryKey: ["getFlashCardData", activityId],
+		queryFn: getFlashCardData,
+		onSuccess: (data) => {
+			setactivtityName(data.activityName);
+		},
+	});
 
-		// upload images to firebase storage and block the code until all images are uploaded
-		for (let i = 0; i < images.length; i++) {
-			const url = await uploadImage(images[i]);
-			imageUrls.push(url);
-		}
+	if (flashCardDataLoading)
+		return (
+			<div className=" w-screen h-[80vh] flex justify-center items-center">
+				<Spinner size="lg" />
+			</div>
+		);
 
-		// dont add data to db until all images are uploaded
-		const flashCardActivity = await addFlashCardDataMutation.mutateAsync({
-			activityName: activtityName,
-			imgUrls: imageUrls,
-		});
-		console.log("flashCardActivity:", flashCardActivity);
-	};
-
-	if (!isFetched || isFetchingActivity) {
-		return <div>loading...</div>;
-	}
+	console.log("flashCardData:", flashCardData);
 
 	return (
 		<form className="p-10 w-1/2" onSubmit={submitHandler}>
@@ -98,11 +122,13 @@ const EditFlashCards = ({ activityId }: Props) => {
 				/>
 			</div>
 
-			{!images && (
+			{!newImages && (
 				<div className="flex items-center justify-center w-full mb-3">
 					<label
 						htmlFor="dropzone-file"
-						className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+						className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 
+						border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 
+						hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
 						<div className="flex flex-col items-center justify-center pt-5 pb-6">
 							<svg
 								className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
@@ -133,37 +159,97 @@ const EditFlashCards = ({ activityId }: Props) => {
 							className="hidden"
 							multiple
 							onChange={(e) => {
-								setImages(e.target.files);
+								const files = e.target.files;
+								if (files) {
+									setNewImages(Array.from(files));
+								}
 							}}
 						/>
 					</label>
 				</div>
 			)}
 
-			{images && (
+			{newImages && (
 				<div className="grid grid-cols-3 gap-2 mb-3 bg-gray-300 p-2 rounded">
-					{Array.from(images).map((image, idx) => (
-						<div key={idx} className="rounded overflow-hidden">
-							<img src={URL.createObjectURL(image)} alt="image" />
+					{newImages.map((image, idx) => (
+						// render images along a delete button
+						<div className="relative" key={idx}>
+							<img
+								src={URL.createObjectURL(image)}
+								alt="image"
+								className="w-full h-full rounded-lg"
+							/>
+							<button
+								type="button"
+								className="absolute top-0 right-0 text-white bg-red-700 hover:bg-red-800 
+								focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg 
+								text-sm w-8 h-8 text-center dark:bg-red-600 dark:hover:bg-red-700 
+								dark:focus:ring-red-800"
+								onClick={() => {
+									setNewImages((prev) => {
+										if (prev) {
+											const newImages = prev.filter(
+												(_, i) => i !== idx
+											);
+											return newImages.length
+												? newImages
+												: null;
+										}
+										return null;
+									});
+								}}>
+								X
+							</button>
 						</div>
 					))}
 				</div>
 			)}
 
 			<div className="flex gap-2">
+				{newImages && (
+					<label
+						htmlFor="dropzone-file2"
+						className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none 
+							focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center 
+							dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800 cursor-pointer">
+						<span>Add More Images</span>
+
+						<input
+							id="dropzone-file2"
+							type="file"
+							className="hidden"
+							multiple
+							onChange={(e) => {
+								const files = e.target.files;
+								if (files) {
+									setNewImages((prev) => {
+										if (prev) {
+											return [
+												...prev,
+												...Array.from(files),
+											];
+										}
+										return Array.from(files);
+									});
+								}
+							}}
+						/>
+					</label>
+				)}
+
 				<button
 					type="submit"
 					className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none 
 				focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center 
-				dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-					Submit
+				dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex gap-2">
+					{uploadingAndSubmitting && <Spinner size="sm" />}
+					Upload & Submit
 				</button>
-				{/* create a reset button to reset the form and images state using ht esame button as above*/}
-
 				<button
 					onClick={() => {
-						setImages(null);
+						setNewImages(null);
 						setactivtityName("");
+						setUploadingAndSubmitting(false);
 					}}
 					className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none 
 				focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center 

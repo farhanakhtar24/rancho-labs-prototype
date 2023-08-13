@@ -9,18 +9,23 @@ type Props = {
  * @sm: w-5 h-5
  * @md: w-10 h-10
  * @lg: w-20 h-20
+ * @xl: w-40 h-40
+ * @2xl: w-80 h-80
  */
 const Spinner = ({ size }: Props) => {
-	const [dimensions, setDimensions] = useState("w-full h-full");
-	useEffect(() => {
+	const [dimensions, setDimensions] = useState(() => {
 		if (size === "sm") {
-			setDimensions("w-5 h-5");
+			return "w-5 h-5";
 		} else if (size === "md") {
-			setDimensions("w-10 h-10");
+			return "w-10 h-10";
 		} else if (size === "lg") {
-			setDimensions("w-20 h-20");
+			return "w-20 h-20";
+		} else if (size === "xl") {
+			return "w-40 h-40";
+		} else if (size === "2xl") {
+			return "w-80 h-80";
 		}
-	}, [size]);
+	});
 	return (
 		<div role="status">
 			<svg

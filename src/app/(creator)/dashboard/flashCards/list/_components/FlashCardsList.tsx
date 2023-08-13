@@ -24,8 +24,8 @@ const FlashCardsList = (props: Props) => {
 	const deleteFLashCardDataMutation = useMutation({
 		mutationFn: deleteFlashCardData,
 		onSuccess: () => {
-			toast.success("deleted data");
 			refetchFlashCardsList();
+			toast.success("deleted data");
 		},
 	});
 
@@ -71,7 +71,7 @@ const FlashCardsList = (props: Props) => {
 					<tbody>
 						{flashCardsData?.map((data: any, index: number) => {
 							const { activityName } = data;
-							const { imgUrls } = data;
+							const { imagesData } = data;
 							return (
 								<tr
 									key={index}
@@ -86,17 +86,19 @@ const FlashCardsList = (props: Props) => {
 										scope="row"
 										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap 
 								dark:text-white">
-										{imgUrls && (
+										{imagesData && (
 											<div className="flex flex-row gap-2">
-												{imgUrls.map(
+												{imagesData.map(
 													(
-														imgUrl: string,
+														imageData: any,
 														idx: number
 													) => {
 														return (
 															<img
 																key={idx}
-																src={imgUrl}
+																src={
+																	imageData.imgUrl
+																}
 																className="w-20 h-auto"
 															/>
 														);

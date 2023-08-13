@@ -44,7 +44,7 @@ model mcqActivity {
 model flashCardsActivity {
   id                   String   @id @default(auto()) @map("_id") @db.ObjectId
   activityName         String
-  imgUrls              String[]
+  imagesData           Json[]
   hasSubmitted         Boolean
   validationFlashCards Json
   createdAt            DateTime @default(now())

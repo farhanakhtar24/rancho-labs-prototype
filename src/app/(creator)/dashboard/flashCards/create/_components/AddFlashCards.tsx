@@ -17,7 +17,7 @@ const AddFlashCards = (props: Props) => {
 	const [activtityName, setactivtityName] = useState("");
 	const [images, setImages] = useState<File[] | null>(null);
 	const [uploadingAndSubmitting, setUploadingAndSubmitting] = useState(false);
-	let imageUrls: string[] = [];
+	let imagesData: { imageName: string; imgUrl: string }[] = [];
 
 	const uploadImage = async (image: File) => {
 		const imageName = image.name + v4();
@@ -26,8 +26,8 @@ const AddFlashCards = (props: Props) => {
 			`flashCards/${activtityName}/${imageName}`
 		);
 		const res = await uploadBytes(imageRef, image);
-		const url = await getDownloadURL(res.ref);
-		return url;
+		const imgUrl = await getDownloadURL(res.ref);
+		return { imageName, imgUrl };
 	};
 
 	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
@@ -43,17 +43,19 @@ const AddFlashCards = (props: Props) => {
 			return;
 		}
 
+		// set loading
 		setUploadingAndSubmitting(true);
 		// upload images to firebase storage and block the code until all images are uploaded
 		for (let i = 0; i < images.length; i++) {
 			const url = await uploadImage(images[i]);
-			imageUrls.push(url);
+			imagesData.push(url);
 		}
 		// dont add data to db until all images are uploaded
 		const flashCardActivity = await addFlashCardDataMutation.mutateAsync({
 			activityName: activtityName,
-			imgUrls: imageUrls,
+			imagesData: imagesData,
 		});
+		// unset loading
 		setUploadingAndSubmitting(false);
 		console.log("flashCardActivity:", flashCardActivity);
 	};
@@ -213,6 +215,7 @@ const AddFlashCards = (props: Props) => {
 					onClick={() => {
 						setImages(null);
 						setactivtityName("");
+						setUploadingAndSubmitting(false);
 					}}
 					className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none 
 				focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center 

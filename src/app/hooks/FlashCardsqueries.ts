@@ -1,10 +1,11 @@
 import axios from "axios";
 import { flashCardRoutes } from "../api/routes";
 
-export const addFlashCardsData = async ({ activityName, imgUrls }: any) => {
+export const addFlashCardsData = async ({ activityName, imagesData }: any) => {
+	console.log(activityName, imagesData);
 	const res = await axios.post(`${flashCardRoutes.addFlashCardData}`, {
 		activityName: activityName,
-		imgUrls: imgUrls,
+		imagesData: imagesData,
 	});
 	const data = res.data;
 	return data;
