@@ -2,7 +2,6 @@ import axios from "axios";
 import { flashCardRoutes } from "../api/routes";
 
 export const addFlashCardsData = async ({ activityName, imagesData }: any) => {
-	console.log(activityName, imagesData);
 	const res = await axios.post(`${flashCardRoutes.addFlashCardData}`, {
 		activityName: activityName,
 		imagesData: imagesData,
@@ -32,4 +31,18 @@ export const getFlashCardData = async ({ queryKey }: any) => {
 		activityId: activityId,
 	});
 	return res.data;
+};
+
+export const updateFlashCardData = async ({
+	activityId,
+	activityName,
+	imagesData,
+}: any) => {
+	const res = await axios.patch(`${flashCardRoutes.updateFlashCardData}`, {
+		activityId: activityId,
+		activityName: activityName,
+		imagesData: imagesData,
+	});
+	const data = res.data;
+	return data;
 };

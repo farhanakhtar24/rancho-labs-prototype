@@ -1,5 +1,6 @@
 "use client";
 import { getMcqActivity } from "@/app/hooks/MCQqueries";
+import Spinner from "@/components/Spinner";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -71,7 +72,11 @@ const EditMcqActivity = ({ activityId }: Props) => {
 	}, [isFetched, mcqData]);
 
 	if (isFetchingActivity) {
-		return <div>Loading...</div>;
+		return (
+			<div className=" w-screen h-[80vh] flex justify-center items-center">
+				<Spinner size="lg" />
+			</div>
+		);
 	}
 
 	console.log("data", data);

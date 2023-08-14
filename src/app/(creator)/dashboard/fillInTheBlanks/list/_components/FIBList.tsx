@@ -1,5 +1,6 @@
 "use client";
 import { deleteFIBData, getFIBList } from "@/app/hooks/FIBqueries";
+import Spinner from "@/components/Spinner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
@@ -28,16 +29,16 @@ const FIBList = (props: Props) => {
 
 	if (isListLoading) {
 		return (
-			<div className="w-full h-full flex justify-center items-center">
-				Loading ...
+			<div className=" w-screen h-[80vh] flex justify-center items-center">
+				<Spinner size="lg" />
 			</div>
 		);
 	}
 
 	if (deleteFIBDataMutation.isLoading) {
 		return (
-			<div className="w-full h-full flex justify-center items-center">
-				Loading ...
+			<div className=" w-screen h-[80vh] flex justify-center items-center">
+				<Spinner size="lg" />
 			</div>
 		);
 	}

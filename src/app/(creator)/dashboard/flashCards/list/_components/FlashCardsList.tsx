@@ -3,7 +3,10 @@ import {
 	deleteFlashCardData,
 	getFlashCardsList,
 } from "@/app/hooks/FlashCardsqueries";
+import Spinner from "@/components/Spinner";
+import { storage } from "@/firebase/config";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { deleteObject, ref } from "firebase/storage";
 import Link from "next/link";
 import React from "react";
 import { toast } from "react-hot-toast";
@@ -12,7 +15,7 @@ type Props = {};
 
 const FlashCardsList = (props: Props) => {
 	const {
-		isLoading: isListLoading,
+		isLoading: isLoadingFlashCardsList,
 		error,
 		data: flashCardsData,
 		refetch: refetchFlashCardsList,
@@ -29,18 +32,35 @@ const FlashCardsList = (props: Props) => {
 		},
 	});
 
-	if (isListLoading) {
+	const deleteImages = async (flashCardsData: any) => {
+		// flashCardsData.
+		const activityName = flashCardsData.activityName;
+		const imagesData: { imageName: string; imgUrl: string }[] =
+			flashCardsData.imagesData;
+		console.log("imagesData", imagesData);
+		console.log("activityName", activityName);
+
+		imagesData.map(async (imageData) => {
+			const imageRef = ref(
+				storage,
+				`flashCards/${activityName}/${imageData.imageName}`
+			);
+			await deleteObject(imageRef);
+		});
+	};
+
+	if (isLoadingFlashCardsList) {
 		return (
-			<div className="w-full h-full flex justify-center items-center">
-				Loading ...
+			<div className=" w-screen h-[80vh] flex justify-center items-center">
+				<Spinner size="lg" />
 			</div>
 		);
 	}
 
 	if (deleteFLashCardDataMutation.isLoading) {
 		return (
-			<div className="w-full h-full flex justify-center items-center">
-				Loading ...
+			<div className=" w-screen h-[80vh] flex justify-center items-center">
+				<Spinner size="lg" />
 			</div>
 		);
 	}
@@ -72,6 +92,7 @@ const FlashCardsList = (props: Props) => {
 						{flashCardsData?.map((data: any, index: number) => {
 							const { activityName } = data;
 							const { imagesData } = data;
+
 							return (
 								<tr
 									key={index}
@@ -119,6 +140,8 @@ const FlashCardsList = (props: Props) => {
 											className="w-full h-full cursor-pointer"
 											onClick={async (e) => {
 												e.preventDefault();
+												await deleteImages(data);
+												// remove data from firestore
 												await deleteFLashCardDataMutation.mutateAsync(
 													{
 														id: data.id,

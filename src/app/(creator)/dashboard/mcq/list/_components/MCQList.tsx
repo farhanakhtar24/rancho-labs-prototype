@@ -1,5 +1,6 @@
 "use client";
 import { deleteMcqActivity, getMcqList } from "@/app/hooks/MCQqueries";
+import Spinner from "@/components/Spinner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { data } from "autoprefixer";
 import Link from "next/link";
@@ -30,16 +31,16 @@ const MCQList = (props: Props) => {
 
 	if (isListLoading) {
 		return (
-			<div className="w-full h-full flex justify-center items-center">
-				Loading ...
+			<div className=" w-screen h-[80vh] flex justify-center items-center">
+				<Spinner size="lg" />
 			</div>
 		);
 	}
 
 	if (deleteMcqActivtyMutation.isLoading) {
 		return (
-			<div className="w-full h-full flex justify-center items-center">
-				Loading ...
+			<div className=" w-screen h-[80vh] flex justify-center items-center">
+				<Spinner size="lg" />
 			</div>
 		);
 	}

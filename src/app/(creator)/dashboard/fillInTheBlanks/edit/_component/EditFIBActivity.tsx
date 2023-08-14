@@ -1,5 +1,6 @@
 "use client";
 import { getFIBData, updateFIBData } from "@/app/hooks/FIBqueries";
+import Spinner from "@/components/Spinner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import React, { FormEvent, useEffect, useState } from "react";
@@ -43,7 +44,11 @@ const EditFIBActivity = ({ activityId }: Props) => {
 	});
 
 	if (isFetchingActivity) {
-		return <div>Loading...</div>;
+		return (
+			<div className=" w-screen h-[80vh] flex justify-center items-center">
+				<Spinner size="lg" />
+			</div>
+		);
 	}
 
 	console.log("data", data);

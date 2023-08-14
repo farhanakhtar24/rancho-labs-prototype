@@ -3,6 +3,7 @@
 import {
 	addFlashCardsData,
 	getFlashCardData,
+	updateFlashCardData,
 } from "@/app/hooks/FlashCardsqueries";
 import Spinner from "@/components/Spinner";
 import { storage } from "@/firebase/config";
@@ -27,7 +28,31 @@ const EditFlashCards = ({ activityId }: Props) => {
 	const [activtityName, setactivtityName] = useState("");
 	const [newImages, setNewImages] = useState<File[] | null>(null);
 	const [uploadingAndSubmitting, setUploadingAndSubmitting] = useState(false);
-	let imagesData: { imageName: string; imgUrl: string }[] = [];
+	const [deletingImage, setDeletingImage] = useState(false);
+	const [oldImagesData, setoldImagesData] = useState<
+		{ imageName: string; imgUrl: string }[]
+	>([]);
+
+	const deleteImage = async (imageName: string) => {
+		const imageRef = ref(
+			storage,
+			`flashCards/${activtityName}/${imageName}`
+		);
+		await deleteObject(imageRef);
+		//delete image from db
+		const filterImagesData = oldImagesData.filter(
+			(image) => image.imageName !== imageName
+		);
+
+		const flashCardActivity = await updateFlashCardDataMutation.mutateAsync(
+			{
+				activityId,
+				activityName: activtityName,
+				imagesData: filterImagesData,
+			}
+		);
+		console.log("flashCardActivity:", flashCardActivity);
+	};
 
 	const uploadImage = async (image: File) => {
 		const imageName = image.name + v4();
@@ -53,29 +78,35 @@ const EditFlashCards = ({ activityId }: Props) => {
 			return;
 		}
 
+		let newImagesData: { imageName: string; imgUrl: string }[] = [];
+
 		// set loading
 		setUploadingAndSubmitting(true);
 		// upload images to firebase storage and block the code until all images are uploaded
 		for (let i = 0; i < newImages.length; i++) {
 			const url = await uploadImage(newImages[i]);
-			imagesData.push(url);
+			newImagesData.push(url);
 		}
 		// dont add data to db until all images are uploaded
-		const flashCardActivity = await addFlashCardDataMutation.mutateAsync({
-			activityName: activtityName,
-			imagesData: imagesData,
-		});
-		// unset loading
+		const flashCardActivity = await updateFlashCardDataMutation.mutateAsync(
+			{
+				activityId,
+				activityName: activtityName,
+				imagesData: [...oldImagesData, ...newImagesData],
+			}
+		);
+		// reset state
 		setUploadingAndSubmitting(false);
+		router.replace("/dashboard/flashCards/list");
 		console.log("flashCardActivity:", flashCardActivity);
 	};
 
-	const addFlashCardDataMutation = useMutation({
-		mutationKey: ["addFlashCardData"],
-		mutationFn: addFlashCardsData,
+	const updateFlashCardDataMutation = useMutation({
+		mutationKey: ["updateFlashCardDataMutation"],
+		mutationFn: updateFlashCardData,
 		onSuccess: () => {
-			toast.success("added data");
-			router.replace("/dashboard/flashCards/list");
+			toast.success("Updated data");
+			refetchFlashCardData();
 		},
 	});
 
@@ -88,6 +119,7 @@ const EditFlashCards = ({ activityId }: Props) => {
 		queryFn: getFlashCardData,
 		onSuccess: (data) => {
 			setactivtityName(data.activityName);
+			setoldImagesData(data.imagesData);
 		},
 	});
 
@@ -121,6 +153,43 @@ const EditFlashCards = ({ activityId }: Props) => {
 					value={activtityName}
 				/>
 			</div>
+
+			{oldImagesData && (
+				<div className="relative grid grid-cols-3 gap-2 mb-3 bg-gray-300 p-2 rounded">
+					{oldImagesData.map((image, idx) => {
+						// render images along a delete button
+						return (
+							<>
+								<div className="relative" key={idx}>
+									{deletingImage && (
+										<div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+											<Spinner size="sm" />
+										</div>
+									)}
+									<img
+										src={image.imgUrl}
+										alt="image"
+										className="w-full h-full rounded-lg"
+									/>
+									<button
+										type="button"
+										className="absolute top-0 right-0 text-white bg-red-700 hover:bg-red-800
+									focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg
+									text-sm w-8 h-8 text-center dark:bg-red-600 dark:hover:bg-red-700
+									dark:focus:ring-red-800"
+										onClick={async () => {
+											setDeletingImage(true);
+											await deleteImage(image.imageName);
+											setDeletingImage(false);
+										}}>
+										X
+									</button>
+								</div>
+							</>
+						);
+					})}
+				</div>
+			)}
 
 			{!newImages && (
 				<div className="flex items-center justify-center w-full mb-3">
