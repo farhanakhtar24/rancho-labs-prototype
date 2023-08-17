@@ -24,7 +24,7 @@ export const getImageChoiceList = async () => {
 };
 
 // deletes a specific image choice data from the database based on the id
-export const deleteImageChoiceData = async (id: any) => {
+export const deleteImageChoiceData = async ({ id }: any) => {
 	const res = await axios.delete(
 		`${imageChoiceRoutes.deleteImageChoiceData}`,
 		{

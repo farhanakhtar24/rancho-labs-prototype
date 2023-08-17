@@ -45,9 +45,6 @@ const AddImageChoice = (props: Props) => {
 		let correctImagesData: { imageName: string; imgUrl: string }[] = [];
 		let incorrectImagesData: { imageName: string; imgUrl: string }[] = [];
 
-		console.log("correctImages", correctImages);
-		console.log("incorrectImages", incorrectImages);
-
 		// set loading
 		setUploadingAndSubmitting(true);
 		// upload images to firebase storage and block the code until all images are uploaded

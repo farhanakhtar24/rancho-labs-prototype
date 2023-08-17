@@ -30,11 +30,6 @@ const ImageChoiceList = (props: Props) => {
 			imageChoiceData.correctImagesData;
 		const incorrectImagesData: { imageName: string; imgUrl: string }[] =
 			imageChoiceData.incorrectImagesData;
-
-		console.log("correctImagesData", correctImagesData);
-		console.log("incorrectImagesData", incorrectImagesData);
-		console.log("activityName", activityName);
-
 		correctImagesData.map(async (imageData) => {
 			const imageRef = ref(
 				storage,
@@ -181,7 +176,6 @@ const ImageChoiceList = (props: Props) => {
 											onClick={async (e) => {
 												e.preventDefault();
 												await deleteImages(data);
-												// remove data from firestore
 												await deleteImageChoiceDataMutation.mutateAsync(
 													{
 														id: data.id,
