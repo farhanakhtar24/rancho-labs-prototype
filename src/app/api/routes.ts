@@ -12,5 +12,12 @@ export const flashCardRoutes = {
 	getFlashCardData: "/api/flashcards/getFlashCardData",
 	updateFlashCardData: "/api/flashcards/updateFlashCardData",
 	getFlashCardList: "/api/flashcards/getFlashCardList",
-	deleteFlashCardImage: "/api/flashcards/deleteFlashCardImage",
+};
+
+export const imageChoiceRoutes = {
+	addImageChoiceData: "/api/imageChoice/addImageChoiceData",
+	deleteImageChoiceData: "/api/imageChoice/deleteImageChoiceData",
+	getImageChoiceData: "/api/imageChoice/getImageChoiceData",
+	updateImageChoiceData: "/api/imageChoice/updateImageChoiceData",
+	getImageChoiceList: "/api/imageChoice/getImageChoiceList",
 };

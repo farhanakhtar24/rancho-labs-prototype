@@ -23,13 +23,6 @@ export async function POST(request: any) {
 	const validationFlaschCardsData = validationFlashCards;
 	const hasSubmittedData = false;
 
-	console.log({
-		activityName,
-		imagesData,
-		validationFlaschCardsData,
-		hasSubmittedData,
-	});
-
 	const FlashCardsActivity = await prisma.flashCardsActivity.create({
 		data: {
 			activityName: activityName,

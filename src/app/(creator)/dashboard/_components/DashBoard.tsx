@@ -90,6 +90,28 @@ const DashBoard = (props: Props) => {
 								</Link>
 							</td>
 						</tr>
+						<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+							<th
+								scope="row"
+								className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap 
+                                dark:text-white">
+								Image Choice
+							</th>
+							<td className="px-6 py-4">
+								<Link
+									className="w-full h-full"
+									href={`/dashboard/imageChoice/create`}>
+									Create
+								</Link>
+							</td>
+							<td className="px-6 py-4">
+								<Link
+									className="w-full h-full"
+									href={`/dashboard/imageChoice/list`}>
+									List
+								</Link>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>

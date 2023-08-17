@@ -1,8 +1,8 @@
 "use client";
 import {
-	deleteFlashCardData,
-	getFlashCardsList,
-} from "@/app/hooks/FlashCardsqueries";
+	deleteImageChoiceData,
+	getImageChoiceList,
+} from "@/app/hooks/ImageChoicequeries";
 import Spinner from "@/components/Spinner";
 import { storage } from "@/firebase/config";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -13,42 +13,54 @@ import { toast } from "react-hot-toast";
 
 type Props = {};
 
-const FlashCardsList = (props: Props) => {
+const ImageChoiceList = (props: Props) => {
 	const {
-		isLoading: isLoadingFlashCardsList,
+		isLoading: isLoadingImageChoiceList,
 		error,
-		data: flashCardsData,
-		refetch: refetchFlashCardsList,
+		data: ImageChoiceData,
+		refetch: refetchImageChoiceList,
 	} = useQuery({
 		queryKey: ["FlashCardsList"],
-		queryFn: getFlashCardsList,
+		queryFn: getImageChoiceList,
 	});
 
-	const deleteFLashCardDataMutation = useMutation({
-		mutationFn: deleteFlashCardData,
-		onSuccess: () => {
-			refetchFlashCardsList();
-			toast.success("deleted data");
-		},
-	});
+	const deleteImages = async (imageChoiceData: any) => {
+		const activityName = imageChoiceData.activityName;
+		const correctImagesData: { imageName: string; imgUrl: string }[] =
+			imageChoiceData.correctImagesData;
+		const incorrectImagesData: { imageName: string; imgUrl: string }[] =
+			imageChoiceData.incorrectImagesData;
 
-	const deleteImages = async (flashCardsData: any) => {
-		const activityName = flashCardsData.activityName;
-		const imagesData: { imageName: string; imgUrl: string }[] =
-			flashCardsData.imagesData;
-		console.log("imagesData", imagesData);
+		console.log("correctImagesData", correctImagesData);
+		console.log("incorrectImagesData", incorrectImagesData);
 		console.log("activityName", activityName);
 
-		imagesData.map(async (imageData) => {
+		correctImagesData.map(async (imageData) => {
 			const imageRef = ref(
 				storage,
-				`flashCards/${activityName}/${imageData.imageName}`
+				`imageChoice/${activityName}/${imageData.imageName}`
+			);
+			await deleteObject(imageRef);
+		});
+
+		incorrectImagesData.map(async (imageData) => {
+			const imageRef = ref(
+				storage,
+				`imageChoice/${activityName}/${imageData.imageName}`
 			);
 			await deleteObject(imageRef);
 		});
 	};
 
-	if (isLoadingFlashCardsList) {
+	const deleteImageChoiceDataMutation = useMutation({
+		mutationFn: deleteImageChoiceData,
+		onSuccess: () => {
+			refetchImageChoiceList();
+			toast.success("deleted data");
+		},
+	});
+
+	if (isLoadingImageChoiceList) {
 		return (
 			<div className=" w-screen h-[80vh] flex justify-center items-center">
 				<Spinner size="lg" />
@@ -56,7 +68,7 @@ const FlashCardsList = (props: Props) => {
 		);
 	}
 
-	if (deleteFLashCardDataMutation.isLoading) {
+	if (deleteImageChoiceDataMutation.isLoading) {
 		return (
 			<div className=" w-screen h-[80vh] flex justify-center items-center">
 				<Spinner size="lg" />
@@ -64,12 +76,12 @@ const FlashCardsList = (props: Props) => {
 		);
 	}
 
-	console.log("data", flashCardsData);
+	console.log("ImageChoiceData", ImageChoiceData);
 
 	return (
 		<div className="p-5">
 			<div className="flex justify-center items-center font-bold text-2xl text-gray-600 pb-5">
-				Flashcards List
+				Image Choice List
 			</div>
 			<div className="relative overflow-x-auto">
 				<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -81,16 +93,20 @@ const FlashCardsList = (props: Props) => {
 								Activity
 							</th>
 							<th scope="col" className="px-6 py-3">
-								Images
+								Correct Images
+							</th>
+							<th scope="col" className="px-6 py-3">
+								Incorrect Images
 							</th>
 							<th scope="col" className="px-6 py-3"></th>
 							<th scope="col" className="px-6 py-3"></th>
 						</tr>
 					</thead>
 					<tbody>
-						{flashCardsData?.map((data: any, index: number) => {
+						{ImageChoiceData?.map((data: any, index: number) => {
 							const { activityName } = data;
-							const { imagesData } = data;
+							const { correctImagesData } = data;
+							const { incorrectImagesData } = data;
 
 							return (
 								<tr
@@ -106,9 +122,34 @@ const FlashCardsList = (props: Props) => {
 										scope="row"
 										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap 
 								dark:text-white">
-										{imagesData && (
+										{correctImagesData && (
 											<div className="flex flex-row gap-2">
-												{imagesData.map(
+												{correctImagesData.map(
+													(
+														imageData: any,
+														idx: number
+													) => {
+														return (
+															<img
+																key={idx}
+																src={
+																	imageData.imgUrl
+																}
+																className="w-20 h-auto"
+															/>
+														);
+													}
+												)}
+											</div>
+										)}
+									</th>
+									<th
+										scope="row"
+										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap 
+								dark:text-white">
+										{incorrectImagesData && (
+											<div className="flex flex-row gap-2">
+												{incorrectImagesData.map(
 													(
 														imageData: any,
 														idx: number
@@ -130,7 +171,7 @@ const FlashCardsList = (props: Props) => {
 									<td className="px-6 py-4">
 										<Link
 											className="w-full h-full"
-											href={`/dashboard/flashCards/edit/${data.id}`}>
+											href={`/dashboard/imageChoice/edit/${data.id}`}>
 											Edit
 										</Link>
 									</td>
@@ -141,7 +182,7 @@ const FlashCardsList = (props: Props) => {
 												e.preventDefault();
 												await deleteImages(data);
 												// remove data from firestore
-												await deleteFLashCardDataMutation.mutateAsync(
+												await deleteImageChoiceDataMutation.mutateAsync(
 													{
 														id: data.id,
 													}
@@ -160,4 +201,4 @@ const FlashCardsList = (props: Props) => {
 	);
 };
 
-export default FlashCardsList;
+export default ImageChoiceList;
