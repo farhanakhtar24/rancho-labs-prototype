@@ -26,9 +26,9 @@ type Props = {
 const EditFlashCards = ({ activityId }: Props) => {
 	const router = useRouter();
 	const [activtityName, setactivtityName] = useState("");
-	const [newImages, setNewImages] = useState<File[] | null>(null);
 	const [uploadingAndSubmitting, setUploadingAndSubmitting] = useState(false);
 	const [deletingImage, setDeletingImage] = useState(false);
+	const [newImages, setNewImages] = useState<File[] | null>(null);
 	const [oldImagesData, setoldImagesData] = useState<
 		{ imageName: string; imgUrl: string }[]
 	>([]);

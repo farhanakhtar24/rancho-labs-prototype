@@ -35,3 +35,30 @@ export const deleteImageChoiceData = async ({ id }: any) => {
 	);
 	return res.data;
 };
+
+export const getImageChoiceData = async ({ queryKey }: any) => {
+	const activityId = queryKey[1];
+	const res = await axios.post(`${imageChoiceRoutes.getImageChoiceData}`, {
+		activityId: activityId,
+	});
+	return res.data;
+};
+
+export const updateImageChoiceData = async ({
+	activityId,
+	activityName,
+	correctImagesData,
+	incorrectImagesData,
+}: any) => {
+	const res = await axios.patch(
+		`${imageChoiceRoutes.updateImageChoiceData}`,
+		{
+			activityId: activityId,
+			activityName: activityName,
+			correctImagesData: correctImagesData,
+			incorrectImagesData: incorrectImagesData,
+		}
+	);
+	const data = res.data;
+	return data;
+};
